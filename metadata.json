@@ -1,0 +1,5 @@
+{
+  "name": "Balance Sheet Forecaster",
+  "description": "A comprehensive financial forecasting tool allowing users to configure scenarios, input historical data, manage debt schedules, and analyze projected balance sheets.",
+  "requestFramePermissions": []
+}
