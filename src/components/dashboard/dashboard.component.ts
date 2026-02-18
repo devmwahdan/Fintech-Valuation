@@ -1,37 +1,43 @@
-
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { FinancialService } from '../../services/financial.service';
+import { PageLayoutComponent } from '../layout/page-layout.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule, PageLayoutComponent],
   template: `
-    <div class="w-full max-w-[1440px] mx-auto p-6 md:p-8">
-      <!-- Page Header -->
-      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
-        <div class="flex flex-col gap-2">
-          <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-1">
-            <span>Scenarios</span>
-            <span class="material-symbols-outlined text-xs">chevron_right</span>
-            <span class="text-primary font-medium">{{ service.activeScenario() }}</span>
-          </div>
-          <h1 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Forecast Output & Analysis</h1>
-          <p class="text-slate-500 dark:text-slate-400 max-w-2xl">
-            Projecting financial health over the next 3 fiscal years based on Q3 2023 actuals and configured loan assumptions.
-          </p>
-        </div>
-        <div class="flex items-center gap-3">
-          <button class="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm">
-            <span class="material-symbols-outlined text-lg text-green-600">table_view</span>
-            Export to Excel
-          </button>
-          <button class="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition-colors shadow-md shadow-primary/20">
-            <span class="material-symbols-outlined text-lg">tune</span>
-            Adjust Assumptions
-          </button>
-        </div>
+    <app-page-layout
+      title="3-Year Forecast Output"
+      [subtitle]="'Projecting financial health for ' + forecastRangeLabel() + ' based on your actual data and configured assumptions.'"
+      [breadcrumb]="'Scenarios » ' + service.activeScenario()"
+      [showActions]="true">
+      <div actions>
+        <button class="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm">
+          <span class="material-symbols-outlined text-lg text-green-600">table_view</span>
+          Export to Excel
+        </button>
+        <button routerLink="/assumptions" class="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition-colors shadow-md shadow-primary/20">
+          <span class="material-symbols-outlined text-lg">tune</span>
+          Adjust Assumptions
+        </button>
+      </div>
+
+      <!-- Year Tabs -->
+      <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+        @for (y of service.forecastYearsList(); track y; let i = $index) {
+          <span class="px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap"
+            [class.bg-primary]="i === 0"
+            [class.text-white]="i === 0"
+            [class.bg-slate-100]="i !== 0"
+            [class.dark:bg-slate-800]="i !== 0"
+            [class.text-slate-600]="i !== 0"
+            [class.dark:text-slate-300]="i !== 0">
+            {{ y }}
+          </span>
+        }
       </div>
 
       <!-- Controls Toolbar -->
@@ -52,7 +58,7 @@ import { FinancialService } from '../../services/financial.service';
             <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Forecast Range</label>
             <div class="flex items-center px-3 py-2 text-sm font-medium text-slate-900 dark:text-white">
               <span class="material-symbols-outlined text-lg mr-2 text-slate-500">date_range</span>
-              FY 2024 - FY 2026
+              FY {{ forecastRangeLabel() }}
             </div>
           </div>
         </div>
@@ -75,17 +81,25 @@ import { FinancialService } from '../../services/financial.service';
             <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
               <tr>
                 <th class="px-6 py-4 font-semibold text-slate-900 dark:text-white min-w-[200px]">Line Item</th>
-                <th class="px-6 py-4 font-semibold text-slate-500 dark:text-slate-400 text-right w-40">FY 2023 (Act)</th>
-                <th class="px-6 py-4 font-bold text-primary text-right w-40 bg-primary/5 dark:bg-primary/10 border-l border-primary/10">FY 2024 (Fcst)</th>
-                <th class="px-6 py-4 font-semibold text-slate-900 dark:text-white text-right w-40">FY 2025 (Fcst)</th>
-                <th class="px-6 py-4 font-semibold text-slate-900 dark:text-white text-right w-40">FY 2026 (Fcst)</th>
+                <th class="px-6 py-4 font-semibold text-slate-500 dark:text-slate-400 text-right w-40">FY {{ lastActualYear() }} (Act)</th>
+                @for (y of service.forecastYearsList(); track y; let i = $index) {
+                  <th class="px-6 py-4 font-bold text-right w-40 border-l border-slate-200 dark:border-slate-700"
+                    [class.text-primary]="i === 0"
+                    [class.bg-primary/5]="i === 0"
+                    [class.dark:bg-primary/10]="i === 0"
+                    [class.border-primary/10]="i === 0"
+                    [class.text-slate-900]="i !== 0"
+                    [class.dark:text-white]="i !== 0">
+                    FY {{ y }} (Fcst)
+                  </th>
+                }
                 <th class="px-6 py-4 font-semibold text-slate-500 dark:text-slate-400 text-right w-32">YoY Growth</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
               <!-- Assets Header -->
               <tr class="bg-slate-50/80 dark:bg-slate-800/30">
-                <td class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2" colspan="6">
+                <td class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2" [attr.colspan]="4 + service.forecastYearsList().length">
                   <span class="material-symbols-outlined text-base">account_balance_wallet</span>
                   Forecasted Balance Sheet - Assets
                 </td>
@@ -130,13 +144,13 @@ import { FinancialService } from '../../services/financial.service';
 
               <!-- Liabilities Header -->
               <tr class="bg-slate-50/80 dark:bg-slate-800/30 border-t border-slate-200 dark:border-slate-700">
-                <td class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2" colspan="6">
+                <td class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2" [attr.colspan]="4 + service.forecastYearsList().length">
                   <span class="material-symbols-outlined text-base">receipt_long</span>
                   Liabilities & Equity
                 </td>
               </tr>
               <!-- Row: Long Term Debt -->
-               <tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+              <tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
                 <td class="px-6 py-4 font-medium text-slate-900 dark:text-white pl-10">Long-term Debt</td>
                 <td class="px-6 py-4 text-right tabular-nums text-slate-500">{{ service.dashboardData().ltDebt.act | number:'1.0-0' }}</td>
                 <td class="px-6 py-4 text-right tabular-nums font-medium text-slate-900 dark:text-white bg-primary/5 dark:bg-primary/10 border-l border-primary/10 group-hover:bg-blue-100/30">{{ service.dashboardData().ltDebt.fcst24 | number:'1.0-0' }}</td>
@@ -148,16 +162,16 @@ import { FinancialService } from '../../services/financial.service';
                   </span>
                 </td>
               </tr>
-              
+
               <!-- Metrics Header -->
-               <tr class="bg-slate-50/80 dark:bg-slate-800/30 border-t border-slate-200 dark:border-slate-700">
-                <td class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2" colspan="6">
+              <tr class="bg-slate-50/80 dark:bg-slate-800/30 border-t border-slate-200 dark:border-slate-700">
+                <td class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2" [attr.colspan]="4 + service.forecastYearsList().length">
                   <span class="material-symbols-outlined text-base">monitoring</span>
                   Key Metrics
                 </td>
               </tr>
               <!-- Row: ROE -->
-               <tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+              <tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
                 <td class="px-6 py-4 font-medium text-slate-900 dark:text-white pl-10">Return on Equity (ROE)</td>
                 <td class="px-6 py-4 text-right tabular-nums text-slate-500">{{ service.dashboardData().metrics.roe.act }}%</td>
                 <td class="px-6 py-4 text-right tabular-nums font-medium text-slate-900 dark:text-white bg-primary/5 dark:bg-primary/10 border-l border-primary/10 group-hover:bg-blue-100/30">{{ service.dashboardData().metrics.roe.fcst24 }}%</td>
@@ -172,7 +186,7 @@ import { FinancialService } from '../../services/financial.service';
         </div>
         <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex flex-col md:flex-row items-center justify-between gap-4">
           <p class="text-xs text-slate-500">
-            <span class="font-semibold text-slate-700 dark:text-slate-300">Note:</span> Figures are projected estimates. Last updated: <span class="font-mono">Oct 26, 2023</span>.
+            <span class="font-semibold text-slate-700 dark:text-slate-300">Note:</span> Figures are projected estimates. Forecast years: <span class="font-mono">{{ forecastRangeLabel() }}</span>.
           </p>
           <div class="flex items-center gap-2">
             <button class="text-xs font-medium text-primary hover:underline">Download Full Report</button>
@@ -181,9 +195,21 @@ import { FinancialService } from '../../services/financial.service';
           </div>
         </div>
       </div>
-    </div>
+    </app-page-layout>
   `
 })
 export class DashboardComponent {
   service = inject(FinancialService);
+
+  lastActualYear = computed(() => {
+    const cfg = this.service.config();
+    return cfg.startingYear + cfg.actualYears - 1;
+  });
+
+  forecastRangeLabel = computed(() => {
+    const years = this.service.forecastYearsList();
+    if (years.length === 0) return '—';
+    if (years.length === 1) return String(years[0]);
+    return years[0] + ' – ' + years[years.length - 1];
+  });
 }

@@ -1,15 +1,61 @@
-
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
+import type { ForecastConfig, YearActualData, LoanEntry, ForecastAssumption } from '../models/forecast-config.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FinancialService {
-  // Global State Signals
+  // Configuration State
+  config = signal<ForecastConfig>({
+    startingYear: 2021,
+    actualYears: 3,
+    forecastYears: 3,
+    numLoans: 2
+  });
+
+  // Derived: list of actual years
+  actualYearsList = computed(() => {
+    const cfg = this.config();
+    const years: number[] = [];
+    for (let i = 0; i < cfg.actualYears; i++) {
+      years.push(cfg.startingYear + i);
+    }
+    return years;
+  });
+
+  // Derived: list of forecast years
+  forecastYearsList = computed(() => {
+    const cfg = this.config();
+    const start = cfg.startingYear + cfg.actualYears;
+    return [start, start + 1, start + 2];
+  });
+
+  // Derived: valid year range for loans (actual + forecast)
+  validLoanYearRange = computed(() => {
+    const cfg = this.config();
+    const min = cfg.startingYear;
+    const max = cfg.startingYear + cfg.actualYears + cfg.forecastYears - 1;
+    return { min, max };
+  });
+
+  // Per-year actual data (keyed by year)
+  yearActuals = signal<Record<number, Partial<YearActualData>>>({});
+
+  // Loans (debits)
+  loans = signal<LoanEntry[]>([
+    { id: 'LN-001', year: 2024, increaseOrDecrease: 500000, endingBalance: 1700000, interestRate: 5.5 },
+    { id: 'LN-002', year: 2025, increaseOrDecrease: 200000, endingBalance: 0, interestRate: 6.25 }
+  ]);
+
+  // Forecast assumptions per year
+  forecastAssumptions = signal<Record<number, Partial<ForecastAssumption>>>({});
+
+  // UI State
   activeScenario = signal('Base Case Growth');
   currentStep = signal(1);
-  
-  // Mock Data for Dashboard
+  currentActualYear = signal<number | null>(null);
+
+  // Dashboard mock data (can be replaced with computed from actuals + assumptions)
   dashboardData = signal({
     cash: { act: 1250000, fcst24: 1450000, fcst25: 1850000, fcst26: 2100000, growth: 16.0 },
     ar: { act: 840000, fcst24: 920000, fcst25: 1050000, fcst26: 1180000, growth: 9.5 },
@@ -25,31 +71,45 @@ export class FinancialService {
     }
   });
 
-  // Loans State
-  loans = signal([
-    { 
-      id: 'LN-2024-001', 
-      name: 'Term Loan A', 
-      type: 'Main Facility', 
-      year: '2025 (Forecast)', 
-      principal: 500000, 
-      rate: 5.50, 
-      balance: 1700000,
-      icon: 'request_quote',
-      colorClass: 'bg-blue-100 text-primary'
-    },
-    { 
-      id: 'LN-2024-002', 
-      name: 'Revolving Credit Line', 
-      type: 'Secondary Facility', 
-      year: '2025 (Forecast)', 
-      principal: 200000, 
-      rate: 6.25, 
-      balance: 0,
-      icon: 'credit_card',
-      colorClass: 'bg-purple-100 text-purple-600'
-    }
-  ]);
-
   constructor() {}
+
+  updateConfig(partial: Partial<ForecastConfig>) {
+    this.config.update(c => ({ ...c, ...partial }));
+  }
+
+  setCurrentActualYear(year: number | null) {
+    this.currentActualYear.set(year);
+  }
+
+  addLoan() {
+    const cfg = this.config();
+    const range = this.validLoanYearRange();
+    const id = `LN-${Date.now()}`;
+    this.loans.update(list => [...list, {
+      id,
+      year: cfg.startingYear + cfg.actualYears,
+      increaseOrDecrease: 0,
+      endingBalance: 0,
+      interestRate: 0
+    }]);
+  }
+
+  removeLoan(id: string) {
+    this.loans.update(list => list.filter(l => l.id !== id));
+  }
+
+  updateLoan(id: string, partial: Partial<LoanEntry>) {
+    this.loans.update(list =>
+      list.map(l => l.id === id ? { ...l, ...partial } : l)
+    );
+  }
+
+  /** Years that have at least one loan */
+  yearsWithLoans = computed(() => {
+    const set = new Set<number>();
+    for (const loan of this.loans()) {
+      set.add(loan.year);
+    }
+    return Array.from(set).sort((a, b) => a - b);
+  });
 }

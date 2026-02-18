@@ -1,58 +1,69 @@
-
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, RouterLinkActive } from '@angular/router';
+
+const NAV_ITEMS = [
+  { path: '/dashboard', label: 'Dashboard', icon: 'pie_chart', step: 5 },
+  { path: '/setup', label: 'Forecast Setup', icon: 'settings_suggest', step: 1 },
+  { path: '/actuals', label: 'Historical Data', icon: 'database', step: 2 },
+  { path: '/loans', label: 'Debits', icon: 'account_balance', step: 3 },
+  { path: '/assumptions', label: 'Assumptions', icon: 'trending_up', step: 4 },
+] as const;
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <aside class="flex w-64 flex-col bg-surface-light dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 h-full overflow-y-auto shrink-0 z-20 hidden md:flex">
+    <!-- Mobile menu button -->
+    <button type="button" (click)="mobileOpen.set(true)"
+      class="md:hidden fixed top-4 left-4 z-40 p-2 rounded-lg bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+
+    <!-- Mobile overlay -->
+    @if (mobileOpen()) {
+      <div class="md:hidden fixed inset-0 bg-black/50 z-40" (click)="mobileOpen.set(false)"></div>
+    }
+
+    <!-- Sidebar -->
+    <aside [class.translate-x-0]="mobileOpen()" [class.-translate-x-full]="!mobileOpen()"
+      class="fixed md:relative inset-y-0 left-0 z-50 md:z-auto w-64 flex flex-col bg-surface-light dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 h-full overflow-y-auto shrink-0 transition-transform duration-300 ease-out md:translate-x-0">
       <div class="flex flex-col gap-4 p-4">
-        <!-- Logo Area -->
-        <div class="flex gap-3 items-center px-2">
-          <div class="bg-gradient-to-br from-primary to-blue-400 size-8 rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary/20">
-            <span class="material-symbols-outlined text-[20px]">analytics</span>
+        <div class="flex items-center justify-between">
+          <div class="flex gap-3 items-center px-2">
+            <div class="bg-gradient-to-br from-primary to-blue-400 size-8 rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary/20">
+              <span class="material-symbols-outlined text-[20px]">analytics</span>
+            </div>
+            <div class="flex flex-col">
+              <h1 class="text-slate-900 dark:text-white text-sm font-bold leading-none">FinanceFlow</h1>
+              <span class="text-[10px] text-slate-500 font-medium mt-1">Balance Sheet Tool</span>
+            </div>
           </div>
-          <div class="flex flex-col">
-            <h1 class="text-slate-900 dark:text-white text-sm font-bold leading-none">FinanceFlow</h1>
-            <span class="text-[10px] text-slate-500 font-medium mt-1">Balance Sheet Tool</span>
-          </div>
+          <button type="button" (click)="mobileOpen.set(false)" class="md:hidden p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+            <span class="material-symbols-outlined">close</span>
+          </button>
         </div>
 
-        <!-- Navigation Links -->
-        <div class="flex flex-col gap-1 mt-6">
-          <a routerLink="/dashboard" routerLinkActive="bg-primary/10 text-primary" [routerLinkActiveOptions]="{exact: true}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
-            <span class="material-symbols-outlined group-[.text-primary]:filled text-[20px]">pie_chart</span>
-            <span class="text-sm font-medium">Dashboard</span>
-          </a>
-          
-          <div class="pt-4 pb-2 px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Configuration</div>
-
-          <a routerLink="/setup" routerLinkActive="bg-primary/10 text-primary" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
-            <span class="material-symbols-outlined group-[.text-primary]:filled text-[20px]">settings_suggest</span>
-            <span class="text-sm font-medium">Forecast Setup</span>
-          </a>
-          
-          <a routerLink="/actuals" routerLinkActive="bg-primary/10 text-primary" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
-            <span class="material-symbols-outlined group-[.text-primary]:filled text-[20px]">database</span>
-            <span class="text-sm font-medium">Historical Data</span>
-          </a>
-
-          <a routerLink="/loans" routerLinkActive="bg-primary/10 text-primary" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
-            <span class="material-symbols-outlined group-[.text-primary]:filled text-[20px]">account_balance</span>
-            <span class="text-sm font-medium">Debt & Loans</span>
-          </a>
-
-          <a routerLink="/assumptions" routerLinkActive="bg-primary/10 text-primary" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
-            <span class="material-symbols-outlined group-[.text-primary]:filled text-[20px]">trending_up</span>
-            <span class="text-sm font-medium">Assumptions</span>
-          </a>
-        </div>
+        <nav class="flex flex-col gap-1 mt-6">
+          @for (item of navItems; track item.path) {
+            <a [routerLink]="item.path" (click)="mobileOpen.set(false)"
+              routerLinkActive="bg-primary/10 text-primary" [routerLinkActiveOptions]="{exact: item.path === '/dashboard'}"
+              class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+              <span class="relative">
+                <span class="material-symbols-outlined group-[.text-primary]:filled text-[20px]">{{ item.icon }}</span>
+                @if (isStepComplete(item.step)) {
+                  <span class="absolute -top-1 -right-1 size-3.5 rounded-full bg-green-500 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-[10px]">check</span>
+                  </span>
+                }
+              </span>
+              <span class="text-sm font-medium">{{ item.label }}</span>
+            </a>
+          }
+        </nav>
       </div>
 
-      <!-- Bottom User Section -->
       <div class="mt-auto p-4 border-t border-slate-200 dark:border-slate-800">
         <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 flex flex-col gap-3">
           <div class="flex items-center gap-3">
@@ -64,8 +75,8 @@ import { Router, RouterModule, RouterLinkActive } from '@angular/router';
               <span class="text-[10px] text-slate-500">Financial Analyst</span>
             </div>
           </div>
-          <button class="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-1.5 w-full px-1">
-            <span class="material-symbols-outlined text-[14px]">logout</span> 
+          <button type="button" class="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-1.5 w-full px-1">
+            <span class="material-symbols-outlined text-[14px]">logout</span>
             <span>Sign Out</span>
           </button>
         </div>
@@ -73,4 +84,23 @@ import { Router, RouterModule, RouterLinkActive } from '@angular/router';
     </aside>
   `
 })
-export class SidebarComponent {}
+export class SidebarComponent {
+  private router = inject(Router);
+
+  mobileOpen = signal(false);
+  navItems = NAV_ITEMS;
+
+  currentStepIndex = computed(() => {
+    const url = this.router.url.split('?')[0];
+    if (url === '/' || url === '' || url.includes('dashboard')) return 5;
+    if (url.includes('setup')) return 1;
+    if (url.includes('actuals')) return 2;
+    if (url.includes('loans')) return 3;
+    if (url.includes('assumptions')) return 4;
+    return 0;
+  });
+
+  isStepComplete(step: number): boolean {
+    return this.currentStepIndex() > step;
+  }
+}
