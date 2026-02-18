@@ -39,7 +39,7 @@ import { PageLayoutComponent } from '../layout/page-layout.component';
                 Number of Actual Years
                 <span class="material-symbols-outlined text-slate-400 text-[18px] cursor-help" title="How many years of historical data (3–5)">info</span>
               </label>
-              <div class="grid grid-cols-3 gap-3">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 @for (opt of [3, 4, 5]; track opt) {
                   <label class="cursor-pointer relative group">
                     <input type="radio" name="actualYears" [value]="opt" [checked]="actualYears() === opt"

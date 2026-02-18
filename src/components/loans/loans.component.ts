@@ -28,8 +28,8 @@ import type { LoanEntry } from '../../models/forecast-config.model';
         </button>
       </div>
 
-      <div class="flex flex-col lg:flex-row gap-8 w-full">
-        <div class="flex-1 flex flex-col gap-8 min-w-0">
+      <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 w-full">
+        <div class="flex-1 flex flex-col gap-6 lg:gap-8 min-w-0">
         <!-- Loans Summary -->
         @if (service.yearsWithLoans().length > 0) {
           <div class="flex flex-wrap items-center gap-2 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
@@ -59,7 +59,7 @@ import type { LoanEntry } from '../../models/forecast-config.model';
                 </button>
               </div>
 
-              <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div class="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <!-- Year -->
                 <div class="flex flex-col gap-1.5">
                   <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Year</label>
@@ -134,7 +134,7 @@ import type { LoanEntry } from '../../models/forecast-config.model';
         </div>
 
         <!-- Right Summary Sidebar -->
-        <aside class="w-full lg:w-[320px] flex-shrink-0 bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 p-6 flex flex-col gap-8 hidden lg:flex self-start">
+        <aside class="hidden lg:flex w-full lg:w-[320px] flex-shrink-0 bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6 flex-col gap-6 lg:gap-8 lg:self-start">
         <div>
           <div class="flex justify-between items-center mb-4">
             <h3 class="font-bold text-slate-900 dark:text-white">Debits Summary</h3>

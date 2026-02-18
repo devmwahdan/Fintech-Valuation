@@ -22,24 +22,24 @@ import { PageLayoutComponent } from '../layout/page-layout.component';
           <span class="material-symbols-outlined text-[18px]">upload</span> Import CSV
         </button>
       </div>
-      <div footerLeft class="flex items-center gap-2">
-        <button type="button" (click)="saveDraft()" class="px-4 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2">
+      <div footerLeft class="flex flex-wrap items-center gap-2">
+        <button type="button" (click)="saveDraft()" class="px-4 py-2.5 min-h-[44px] rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 touch-manipulation">
           <span class="material-symbols-outlined text-[18px]">save</span> Save Draft
         </button>
         @if (activeYearIndex() > 0) {
-          <button type="button" (click)="goToPrevYear()" class="px-6 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-2">
-            <span class="material-symbols-outlined text-[20px]">arrow_back</span> Previous Year
+          <button type="button" (click)="goToPrevYear()" class="px-4 sm:px-6 py-2.5 min-h-[44px] border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 touch-manipulation">
+            <span class="material-symbols-outlined text-[20px]">arrow_back</span> <span class="sm:hidden">Prev</span><span class="hidden sm:inline">Previous Year</span>
           </button>
         }
       </div>
-      <div footerRight class="flex items-center gap-2">
+      <div footerRight class="flex flex-wrap items-center gap-2">
         @if (activeYearIndex() < service.actualYearsList().length - 1) {
-          <button type="button" (click)="goToNextYear()" class="px-6 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white font-semibold rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors flex items-center gap-2">
-            Next Year <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+          <button type="button" (click)="goToNextYear()" class="px-4 sm:px-6 py-2.5 min-h-[44px] bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white font-semibold rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors flex items-center gap-2 touch-manipulation">
+            <span class="sm:hidden">Next</span><span class="hidden sm:inline">Next Year</span> <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
           </button>
         }
         @if (activeYearIndex() === service.actualYearsList().length - 1) {
-          <button routerLink="/loans" class="bg-primary hover:bg-primary-hover text-white px-8 py-2.5 rounded-lg font-semibold shadow-lg shadow-primary/30 transition-all flex items-center gap-2">
+          <button routerLink="/loans" class="bg-primary hover:bg-primary-hover text-white px-6 sm:px-8 py-2.5 min-h-[44px] rounded-lg font-semibold shadow-lg shadow-primary/30 transition-all flex items-center gap-2 touch-manipulation">
             Next: Debits <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
           </button>
         }

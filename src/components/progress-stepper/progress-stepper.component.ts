@@ -17,17 +17,17 @@ const STEPS = [
   imports: [CommonModule, RouterModule],
   template: `
     <div class="w-full max-w-[1440px] mx-auto">
-      <div class="flex items-center justify-between mb-4 px-2">
-        <p class="text-slate-900 dark:text-white text-base font-semibold">{{ currentStepLabel() }}</p>
-        <span class="text-slate-500 text-sm font-medium">{{ progressPercent() }}% Completed</span>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3 sm:mb-4 px-1 sm:px-2 text-center sm:text-left">
+        <p class="text-slate-900 dark:text-white text-sm sm:text-base font-semibold truncate w-full sm:w-auto">{{ currentStepLabel() }}</p>
+        <span class="text-slate-500 text-xs sm:text-sm font-medium">{{ progressPercent() }}%</span>
       </div>
-      <div class="relative h-2.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+      <div class="relative h-2 w-full sm:h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
         <div class="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-500 ease-out" [style.width.%]="progressPercent()"></div>
       </div>
-      <div class="hidden md:flex justify-between mt-3 text-xs font-medium px-1 gap-1">
+      <div class="flex flex-wrap justify-center sm:justify-between mt-2 sm:mt-3 text-[10px] sm:text-xs font-medium px-0.5 sm:px-1 gap-1 sm:gap-0.5 overflow-x-auto pb-1 -mx-1">
         @for (s of steps; track s.path) {
           <a [routerLink]="s.path" [class]="getStepClass(s)"
-            class="flex-1 text-center py-1.5 rounded-md transition-colors min-w-0 truncate">
+            class="flex-shrink-0 sm:flex-1 text-center py-1.5 px-1.5 sm:px-2 rounded-md transition-colors whitespace-nowrap">
             {{ s.label }}
           </a>
         }

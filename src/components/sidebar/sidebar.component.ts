@@ -1,6 +1,7 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, RouterLinkActive } from '@angular/router';
+import { MobileMenuService } from '../../services/mobile-menu.service';
 
 const NAV_ITEMS = [
   { path: '/dashboard', label: 'Dashboard', icon: 'pie_chart', step: 5 },
@@ -15,19 +16,13 @@ const NAV_ITEMS = [
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <!-- Mobile menu button -->
-    <button type="button" (click)="mobileOpen.set(true)"
-      class="md:hidden fixed top-4 left-4 z-40 p-2 rounded-lg bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-      <span class="material-symbols-outlined">menu</span>
-    </button>
-
     <!-- Mobile overlay -->
-    @if (mobileOpen()) {
-      <div class="md:hidden fixed inset-0 bg-black/50 z-40" (click)="mobileOpen.set(false)"></div>
+    @if (mobileMenu.open()) {
+      <div class="md:hidden fixed inset-0 bg-black/50 z-40" (click)="mobileMenu.close()"></div>
     }
 
     <!-- Sidebar -->
-    <aside [class.translate-x-0]="mobileOpen()" [class.-translate-x-full]="!mobileOpen()"
+    <aside [class.translate-x-0]="mobileMenu.open()" [class.-translate-x-full]="!mobileMenu.open()"
       class="fixed md:relative inset-y-0 left-0 z-50 md:z-auto w-64 flex flex-col bg-surface-light dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 h-full overflow-y-auto shrink-0 transition-transform duration-300 ease-out md:translate-x-0">
       <div class="flex flex-col gap-4 p-4">
         <div class="flex items-center justify-between">
@@ -40,14 +35,14 @@ const NAV_ITEMS = [
               <span class="text-[10px] text-slate-500 font-medium mt-1">Balance Sheet Tool</span>
             </div>
           </div>
-          <button type="button" (click)="mobileOpen.set(false)" class="md:hidden p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+          <button type="button" (click)="mobileMenu.close()" class="md:hidden p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
 
         <nav class="flex flex-col gap-1 mt-6">
           @for (item of navItems; track item.path) {
-            <a [routerLink]="item.path" (click)="mobileOpen.set(false)"
+            <a [routerLink]="item.path" (click)="mobileMenu.close()"
               routerLinkActive="bg-primary/10 text-primary" [routerLinkActiveOptions]="{exact: item.path === '/dashboard'}"
               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
               <span class="relative">
@@ -86,8 +81,7 @@ const NAV_ITEMS = [
 })
 export class SidebarComponent {
   private router = inject(Router);
-
-  mobileOpen = signal(false);
+  mobileMenu = inject(MobileMenuService);
   navItems = NAV_ITEMS;
 
   currentStepIndex = computed(() => {

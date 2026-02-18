@@ -16,16 +16,16 @@ import { PageLayoutComponent } from '../layout/page-layout.component';
       subtitle="Configure your base case scenario for the next 3 fiscal years. Each forecast year has its own assumptions."
       breadcrumb="Forecasts » Assumptions"
       [showActions]="true">
-      <div actions>
+      <div actions class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
         <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Last saved: 2 min ago</span>
-        <button routerLink="/dashboard" (click)="onRunForecast()" class="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold transition-all shadow-sm">
+        <button routerLink="/dashboard" (click)="onRunForecast()" class="flex items-center justify-center gap-2 rounded-lg min-h-[44px] px-5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold transition-all shadow-sm touch-manipulation">
           <span class="material-symbols-outlined text-[18px]">play_arrow</span> Run Forecast
         </button>
       </div>
 
-      <div class="flex flex-col gap-8 pb-10">
+      <div class="flex flex-col gap-6 sm:gap-8 pb-10">
           <!-- Forecast Year Labels -->
-          <div class="flex flex-wrap gap-4 p-4 rounded-xl bg-primary/5 dark:bg-primary/10 border border-primary/20">
+          <div class="flex flex-wrap gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-primary/5 dark:bg-primary/10 border border-primary/20">
             <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Forecast Years:</span>
             @for (y of service.forecastYearsList(); track y; let i = $index) {
               <span class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-white">
@@ -42,7 +42,7 @@ import { PageLayoutComponent } from '../layout/page-layout.component';
             </div>
             <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-surface-dark shadow-sm">
               <div class="overflow-x-auto">
-                <table class="w-full min-w-[800px] border-collapse">
+                <table class="w-full min-w-[640px] sm:min-w-[800px] border-collapse">
                   <thead>
                     <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                       <th class="px-6 py-4 text-left w-[35%]"><span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Metric</span></th>
@@ -120,7 +120,7 @@ import { PageLayoutComponent } from '../layout/page-layout.component';
             </div>
             <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-surface-dark shadow-sm">
               <div class="overflow-x-auto">
-                <table class="w-full min-w-[600px] border-collapse">
+                <table class="w-full min-w-[480px] sm:min-w-[600px] border-collapse">
                   <thead>
                     <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                       <th class="px-6 py-4 text-left w-[40%]"><span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Metric</span></th>
@@ -156,7 +156,7 @@ import { PageLayoutComponent } from '../layout/page-layout.component';
             </div>
             <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-surface-dark shadow-sm">
               <div class="overflow-x-auto">
-                <table class="w-full min-w-[600px] border-collapse">
+                <table class="w-full min-w-[480px] sm:min-w-[600px] border-collapse">
                   <thead>
                     <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                       <th class="px-6 py-4 text-left w-[40%]"><span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Metric</span></th>
